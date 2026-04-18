@@ -14,6 +14,8 @@ This repository documents my hands-on journey transitioning from a backend/cloud
 ### Objective
 Set up a local Kubernetes cluster using Minikube.
 
+---
+
 **First install:**
 
 ✅ Minikube v1.38.1 - tool that sets up a local, lightweight Kubernetes cluster for learning/testing 
