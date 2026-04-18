@@ -9,44 +9,74 @@ This repository documents my hands-on journey transitioning from a backend/cloud
 
 ---
 
-## Day 1 — Kubernetes Setup (Minikube)
+## Step 1 — Kubernetes Setup (Minikube)
 
 ### Objective
 Set up a local Kubernetes cluster using Minikube.
 
-First intalled:
-Minikube v1.38.1 
-kubectl v1.35.3
-Docker 29.4.0 
-Docker Desktop
-WSL 2
-Chocolatey
+**First install:**
 
-Then
+✅ Minikube v1.38.1 
+
+✅ kubectl v1.35.3
+
+✅ Docker 29.4.0 
+
+✅ Docker Desktop
+
+✅ WSL 2
+
+✅ Chocolatey
+
+---
+
+**Then start a single-node Kubernetes cluster:**
 ```
 minikube start
 ```
 
 Minikube failed with:
-"This computer doesn't have VT-X/AMD-v enabled"
+"This computer doesn't have VT-X/AMD-v enabled."
 
-Caused by:
-Cause
-Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/minikube%20error.png)
 
-Solution:
-Switched to Docker driver
+**Caused by:**
+
+Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox.
+
+**Solution:**
+
+Switched to Docker driver.
 
 ```
 minikube delete
 minikube start --driver=docker
 ```
-Ensured Docker Desktop was running:
-```
 
-Result:
-Cluster successfully running
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20driver.png)
 
+**Ensured Docker Desktop was running:**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20desktop.png)
+
+---
+
+**Check Kubernetes environment and connectivity:**
 ```
+kubectl version --client
+kubectl cluster-info
 kubectl get nodes
 ```
+
+**Result:**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubernetes%20checks.png)
+
+✅ Kubernetes cluster is running (minikube node)
+
+✅ Status is "Ready" (healthy)
+
+✅ Control plane is working (can accept workloads)
+
+✅ Running latest K8s version (v1.35.1)
+
