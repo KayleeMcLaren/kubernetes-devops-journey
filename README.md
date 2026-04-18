@@ -16,7 +16,7 @@ Set up a local Kubernetes cluster using Minikube.
 
 ---
 
-**First install:**
+**First, Environemnt Set Up:**
 
 ✅ Minikube v1.38.1 - tool that sets up a local, lightweight Kubernetes cluster for learning/testing 
 
@@ -63,7 +63,7 @@ minikube start --driver=docker
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20driver.png)
 
-**Ensured Docker Desktop was running:**
+**Ensured Docker Desktop is running:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20desktop.png)
 
@@ -103,3 +103,10 @@ kubectl get all -n kube-system
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/exploring.png)
 
+---
+## Step 2: First Deployment
+
+### Objective
+Deploy something simple to understand K8s basics
+
+---
