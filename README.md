@@ -51,7 +51,7 @@ Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox.
 
 **Solution:**
 
-Switched to Docker driver.
+Switched to Docker driver - more stable on Windows.
 
 ```
 minikube delete
