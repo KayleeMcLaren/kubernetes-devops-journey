@@ -40,6 +40,11 @@ Minikube failed with:
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/minikube%20error.png)
 
+**Even though it is:**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/BIOS.jpeg)
+
+
 **Caused by:**
 
 Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox.
