@@ -16,17 +16,15 @@ Set up a local Kubernetes cluster using Minikube.
 
 **First install:**
 
-✅ Minikube v1.38.1 
+✅ Minikube v1.38.1 - tool that sets up a local, lightweight Kubernetes cluster for learning/testing 
 
-✅ kubectl v1.35.3
+✅ kubectl v1.35.3 - command line tool for interacting with your cluster via the Kubernetes API
 
-✅ Docker 29.4.0 
+✅ Docker 29.4.0 - OS‑level virtualization (or containerization) platform
 
-✅ Docker Desktop
+✅ Docker Desktop - Docker desktop app that provides automatic configuration (WSL2 integration)
 
-✅ WSL 2
-
-✅ Chocolatey
+✅ WSL 2 - compatibility layer (translates foreign system calls into native host calls) to run Linux applications, utilities, and commands on Windows without needing a VM
 
 ---
 
@@ -51,7 +49,10 @@ Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox.
 
 **Solution:**
 
-Switched to Docker driver - more stable on Windows.
+Switched to Docker driver - more stable on Windows. 
+This works because Docker operates at the OS level by sharing the host’s kernel.
+Docker Desktop automatically launches a lightweight Linux VM in the background to provide that necessary kernel.
+Windows uses the Windows Subsystem for Linux (WSL 2) to get near-native performance.
 
 ```
 minikube delete
@@ -84,4 +85,19 @@ kubectl get nodes
 ✅ Control plane is working (can accept workloads)
 
 ✅ Running latest K8s version (v1.35.1)
+
+
+**Exploring a bit...**
+```
+# All running pods (system ones)
+kubectl get pods --all-namespaces
+
+# System services
+kubectl get services --all-namespaces
+
+# What's running in kube-system namespace
+kubectl get all -n kube-system
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/exploring.png)
 
