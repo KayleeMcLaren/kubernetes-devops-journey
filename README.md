@@ -319,5 +319,101 @@ minikube service nginx-service
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20browser%202.png)
 
-
 ---
+
+# K8s Magic:
+
+## Self-healing:
+```
+kubectl get pods
+kubectl delete pod nginx-deployment-fd956d49d-7lshm
+kubectl get pods
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/self%20healing.png)
+
+A new pod (nginx-deployment-fd956d49d-wdpgx) is automatically created to maintain `replicas: 2` in the nginx-deployment.yaml configuration file.
+
+*In production, if a server dies, K8s replaces it automatically.*
+
+## Scale up the deployment
+```
+kubectl scale deployment nginx-deployment --replicas=5
+kubectl get pods
+kubectl scale deployment nginx-deployment --replicas=2
+kubectl get pods
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/scale%20up%20and%20down.png)
+
+K8s constantly works to match actual state with the **desired state**.
+
+The `kubectl scale deployment nginx-deployment --replicas=5` command immediately instructs the Kubernetes control plane to update the desired state of the application to 5 Pods.
+
+If there are fewer than 5 Pods, the cluster will automatically start new ones to reach that target.
+
+## Update the nginx version (rolling update)
+
+Edit nginx-deployment.yaml and change: `image: nginx:1.27` to `image: nginx:1.26`.
+
+Apply the change, watch the rollout, and then check the image.
+
+```
+kubectl apply -f nginx-deployment.yaml
+kubectl rollout status deployment/nginx-deployment
+kubectl describe pods | findstr Image:
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20rolling%20update.png)
+
+K8s:
+* Created new pods with nginx:1.26
+* Waited for them to be ready
+* Terminated old pods with nginx:1.27
+* All with zero downtime! 
+
+## Use Kubernetes Dashboard to visualise the cluster:
+
+### Run:
+```
+minikube dashboard
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/dashboard%20cmd.png)
+
+### Result:
+This opens a web UI showing:
+* All deployments
+* All pods
+* All services
+* Resource usage
+* Logs
+* Etc.
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/dashboard%20view.png)
+
+## One command to see everything:
+```
+kubectl get all
+```
+
+### This shows:
+* Pods (individual containers)
+* Services (network endpoints)
+* Deployments (pod managers)
+* ReplicaSets (created by Deployment, manages pod replicas)
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/get%20all%20cmd.png)
+
+## Clean up
+
+Delete nginx-deployment.yaml and nginx-service.yaml files, confirm that they're gone (`kubectl get all` should only show the default kubernetes service), and pause the cluster.
+```
+kubectl delete -f nginx-deployment.yaml
+kubectl delete -f nginx-service.yaml
+kubectl get all
+minikube stop
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/clean%20up.png)
+
