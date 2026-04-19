@@ -1,6 +1,20 @@
 # kubernetes-devops-journey
 This repository documents my hands-on journey transitioning from a backend/cloud engineer to a DevOps/SRE-focused engineer.
 
+---
+
+## Table of Contents
+- [Goals](#goals)
+- [Step 1: Kubernetes Setup (Minikube)](#step-1--kubernetes-setup-minikube)
+- [Step 2: First Deployment](#step-2-first-deployment)
+- [K8s Magic: Self-Healing & Scaling](#k8s-magic)
+- [Visualizing with Dashboard](#use-kubernetes-dashboard-to-visualise-the-cluster)
+- [Clean Up](#clean-up)
+- [Key Learnings](#key-learnings) ← NEW
+- [Next Steps](#next-steps) ← NEW
+
+---
+
 # Goals
 - Build production-ready Kubernetes systems
 - Implement CI/CD pipelines
@@ -418,3 +432,26 @@ minikube stop
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/clean%20up.png)
 
+---
+
+## 🎓 Key Learnings
+
+**Concepts Mastered:**
+- ✅ Kubernetes fundamentals (Pods, Deployments, Services, ReplicaSets)
+- ✅ kubectl CLI for cluster interaction
+- ✅ Declarative configuration with YAML
+- ✅ Self-healing and auto-scaling
+- ✅ Rolling updates for zero-downtime deployments
+- ✅ Container minimalism and debugging strategies
+
+**Skills Developed:**
+- Troubleshooting virtualization issues (VT-X → Docker driver)
+- Understanding K8s architecture (control plane, nodes, pods)
+- Using kubectl to inspect and debug resources
+- Reading K8s manifests and understanding desired state
+
+**Production Insights:**
+- Kubernetes constantly reconciles actual state → desired state
+- Containers are minimal by design (only what's needed)
+- Self-healing eliminates manual intervention
+- Rolling updates enable continuous deployment
