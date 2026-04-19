@@ -434,7 +434,7 @@ minikube stop
 
 ---
 
-## 🎓 Key Learnings
+## Key Learnings
 
 **Concepts Mastered:**
 - ✅ Kubernetes fundamentals (Pods, Deployments, Services, ReplicaSets)
