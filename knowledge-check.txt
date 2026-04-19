@@ -1,0 +1,27 @@
+Q1: What is Minikube?
+A tool that sets up a local, lightweight Kubernetes cluster for learning/testing.
+
+Q2: What is kubectl?
+The command line tool for interacting with your cluster via the Kubernetes API.
+
+Q3: What does kubectl get nodes show?
+All the nodes registered in a Kubernetes cluster
+
+Q4: Why did you use --driver=docker?
+As a workout for the common Windows error where Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox. 
+Using the Docker driver launches a local Kubernetes cluster by running the Minikube control plane inside a Docker container.
+This works because Docker operates at the OS level by sharing the host’s kernel.
+Docker Desktop automatically launches a lightweight Linux VM in the background to provide that necessary kernel.
+Windows uses the Windows Subsystem for Linux (WSL 2) to get near-native performance.
+
+Q5: What's the difference between a Pod and a Deployment?
+Pod = runs containers. Deployment = manages pods (creates, scales, updates, heals them).
+
+Q6: What does a Service do?
+Provides a stable network endpoint and load balances across pods.
+
+Q7: What happens if you delete a pod that's managed by a Deployment?
+K8s automatically creates a new pod to maintain the desired replica count.
+
+Q8: How do you scale a deployment?
+kubectl scale deployment
