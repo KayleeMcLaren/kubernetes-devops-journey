@@ -1,7 +1,7 @@
 # kubernetes-devops-journey
 This repository documents my hands-on journey transitioning from a backend/cloud engineer to a DevOps/SRE-focused engineer.
 
-## Goals
+# Goals
 - Build production-ready Kubernetes systems
 - Implement CI/CD pipelines
 - Add observability (Prometheus + Grafana)
@@ -9,14 +9,14 @@ This repository documents my hands-on journey transitioning from a backend/cloud
 
 ---
 
-## Step 1 — Kubernetes Setup (Minikube)
+# Step 1 — Kubernetes Setup (Minikube)
 
-### Objective
+## Objective
 Set up a local Kubernetes cluster using Minikube.
 
 ---
 
-### **First, Environemnt Set Up:**
+## **First, Environemnt Set Up:**
 
 ✅ Minikube v1.38.1 - tool that sets up a local, lightweight Kubernetes cluster for learning/testing 
 
@@ -30,7 +30,7 @@ Set up a local Kubernetes cluster using Minikube.
 
 ---
 
-### **Then start a single-node Kubernetes cluster:**
+## **Then start a single-node Kubernetes cluster:**
 ```
 minikube start
 ```
@@ -64,7 +64,7 @@ minikube start --driver=docker
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20driver.png)
 
-### **Ensured Docker Desktop is running:**
+### **Ensure Docker Desktop is running:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20desktop.png)
 
@@ -89,6 +89,7 @@ kubectl get nodes
 
 ✅ Running latest K8s version (v1.35.1)
 
+---
 
 ### **Exploring a bit...**
 ```
@@ -105,14 +106,15 @@ kubectl get all -n kube-system
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/exploring.png)
 
 ---
-## Step 2: First Deployment
 
-### Objective
+# Step 2: First Deployment
+
+## Objective
 Deploy something simple to understand K8s basics
 
 ---
 
-### **First, make a folder for K8s files:**
+## **First, make a folder for K8s files:**
 ```
 mkdir k8s-learning
 ```
@@ -121,7 +123,7 @@ mkdir k8s-learning
 
 ---
 
-### **Create deployment file:**
+## **Create deployment file:**
 ```
 notepad nginx-deployment.yaml
 ```
@@ -156,7 +158,7 @@ template:                    # Template for the pods
 ```
 ---
 
-### **Deploy 2 nginx pods to K8s cluster:**
+## **Deploy 2 nginx pods to K8s cluster:**
 ```
 kubectl apply -f nginx-deployment.yaml
 ```
@@ -176,7 +178,9 @@ minikube start --driver=docker
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/successful%20deployment.png)
 
-**Success! Now to explore...**
+### **Success! Now to explore...**
+
+---
 
 ### **Check deployment:**
 ```
@@ -265,3 +269,55 @@ cat /proc/*/cmdline
 ```
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/alt%20processes%20cmd.png)
+
+---
+
+## **Next, expose the deployment:**
+*Note: Right now the pods exist but can't be accessed from outside of the cluster*
+
+## First, create a service: ##
+```
+notepad nginx-service.yaml
+```
+
+## Content: ##
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: NodePort	# Expose on a port on the node (for local testing)
+  selector:
+    app: nginx		# Route traffic to pods with label "app: nginx"
+  ports:
+  - protocol: TCP
+    port: 80		# Service listens on port 80
+    targetPort: 80	# Forward to pod's port 80
+```
+
+## Then apply the service:
+
+```
+kubectl apply -f nginx-service.yaml
+```
+
+## Check the service:
+
+```
+kubectl get services
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/create%20nginx%20service.png)
+
+## Lastly, access nginx in the browser:
+
+```
+minikube service nginx-service
+```
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20browser%201.png)
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20browser%202.png)
+
+
+---
