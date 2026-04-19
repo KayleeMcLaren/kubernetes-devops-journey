@@ -16,7 +16,7 @@ Set up a local Kubernetes cluster using Minikube.
 
 ---
 
-**First, Environemnt Set Up:**
+### **First, Environemnt Set Up:**
 
 ✅ Minikube v1.38.1 - tool that sets up a local, lightweight Kubernetes cluster for learning/testing 
 
@@ -30,26 +30,27 @@ Set up a local Kubernetes cluster using Minikube.
 
 ---
 
-**Then start a single-node Kubernetes cluster:**
+### **Then start a single-node Kubernetes cluster:**
 ```
 minikube start
 ```
 
+### Error:
 Minikube failed with:
 "This computer doesn't have VT-X/AMD-v enabled."
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/minikube%20error.png)
 
-**Even though it is:**
+### **Even though it is:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/BIOS.jpeg)
 
 
-**Caused by:**
+### **Caused by:**
 
 Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox.
 
-**Solution:**
+### **Solution:**
 
 Switched to Docker driver - more stable on Windows. 
 This works because Docker operates at the OS level by sharing the host’s kernel.
@@ -63,20 +64,20 @@ minikube start --driver=docker
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20driver.png)
 
-**Ensured Docker Desktop is running:**
+### **Ensured Docker Desktop is running:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20desktop.png)
 
 ---
 
-**Check Kubernetes environment and connectivity:**
+### **Check Kubernetes environment and connectivity:**
 ```
 kubectl version --client
 kubectl cluster-info
 kubectl get nodes
 ```
 
-**Result:**
+### **Result:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubernetes%20checks.png)
 
@@ -89,7 +90,7 @@ kubectl get nodes
 ✅ Running latest K8s version (v1.35.1)
 
 
-**Exploring a bit...**
+### **Exploring a bit...**
 ```
 # All running pods (system ones)
 kubectl get pods --all-namespaces
@@ -110,3 +111,157 @@ kubectl get all -n kube-system
 Deploy something simple to understand K8s basics
 
 ---
+
+### **First, make a folder for K8s files:**
+```
+mkdir k8s-learning
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/k8s-learning%20folder.png)
+
+---
+
+### **Create deployment file:**
+```
+notepad nginx-deployment.yaml
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/deployment%20file%20.png)
+
+### **Content:**
+
+*Note: K8s uses YAML to describe **desired state**.*
+```
+apiVersion: apps/v1          # K8s API version for Deployments
+kind: Deployment             # Create a Deployment object
+metadata:
+  name: nginx-deployment     # Name of this deployment
+  labels:
+    app: nginx               # Label for organizing resources
+spec:
+  replicas: 2                # Run 2 copies (pods)
+  selector:
+    matchLabels:
+      app: nginx             # This deployment manages pods with label "app: nginx"
+template:                    # Template for the pods
+    metadata:
+      labels:
+        app: nginx           # Pods get this label
+    spec:
+      containers:
+      - name: nginx          # Container name
+        image: nginx:1.27    # Docker image to use
+        ports:
+        - containerPort: 80  # Container listens on port 80
+```
+---
+
+### **Deploy 2 nginx pods to K8s cluster:**
+```
+kubectl apply -f nginx-deployment.yaml
+```
+
+### **Error:**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20deployment%20error.png)
+
+### **Restart minikube:**
+```
+minikube start --driver=docker
+```
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/restart%20minikube.png)
+
+
+### **Retry deployment:**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/successful%20deployment.png)
+
+**Success! Now to explore...**
+
+### **Check deployment:**
+```
+kubectl get deployments
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubectl%20get%20deployment.png)
+
+✅ READY 2/2 = 2 pods running out of 2 desired 
+
+✅ UP-TO-DATE = latest version deployed
+
+✅ AVAILABLE = ready to serve traffic
+
+### **Check pods:**
+```
+kubectl get pods
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubectl%20get%20pods.png)
+
+
+✅ 2 pods (because replicas: 2)
+
+✅ Each has a unique name (deployment name + random suffix)
+
+✅ Status is Running 
+
+✅ READY 1/1 = 1 container running in the pod
+
+
+### **Get detailed info about a pod:**
+```
+kubectl describe pod nginx-deployment-fd956d49d-7lshm
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubctl%20detailed%20pod%20info.png)
+
+
+**Tons of info:**
+* Pod IP address
+* Node it's running on
+* Container image
+* Resource requests/limits
+* Events (what happened to this pod)
+
+
+### **Check logs for a pod:**
+
+```
+kubectl logs nginx-deployment-fd956d49d-7lshm
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/pod%20logs.png)
+
+
+### **Get shell access to a pod:**
+
+```
+kubectl exec -it nginx-deployment-fd956d49d-7lshm -- /bin/bash
+```
+
+### **See nginx config:**
+```
+cat /etc/nginx/nginx.conf
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/pod%20shell%20access.png)
+
+
+### **See processes:**
+```
+ps aux
+```
+
+### **Error:**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/ps%20aux%20error.png)
+
+### **Why?**
+The nginx container image is minimal — it only includes what's needed to run nginx, nothing extra. ps is not needed to run nginx, so it's not included.
+
+### **Try a different way:**
+```
+cat /proc/*/cmdline
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/alt%20processes%20cmd.png)
