@@ -53,6 +53,7 @@ Windows virtualization (Hyper-V / VBS) conflicts with VirtualBox.
 ### **Solution:**
 
 Switched to Docker driver - more stable on Windows. 
+Using the Docker driver launches a local Kubernetes cluster by running the Minikube control plane inside a Docker container.
 This works because Docker operates at the OS level by sharing the host’s kernel.
 Docker Desktop automatically launches a lightweight Linux VM in the background to provide that necessary kernel.
 Windows uses the Windows Subsystem for Linux (WSL 2) to get near-native performance.
