@@ -1,18 +1,10 @@
-# kubernetes-devops-journey
-This repository documents my hands-on journey transitioning from a backend/cloud engineer to a DevOps/SRE-focused engineer.
+# Kubernetes DevOps Journey
 
----
+![Kubernetes](https://img.shields.io/badge/kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Learning](https://img.shields.io/badge/Status-In%20Progress-yellow?style=for-the-badge)
 
-## Table of Contents
-- [Goals](#goals)
-- [Step 1: Kubernetes Setup (Minikube)](#step-1--kubernetes-setup-minikube)
-- [Step 2: First Deployment](#step-2-first-deployment)
-- [K8s Magic: Self-Healing & Scaling](#k8s-magic)
-- [Visualizing with Dashboard](#use-kubernetes-dashboard-to-visualise-the-cluster)
-- [Clean Up](#clean-up)
-- [Key Learnings](#key-learnings) ← NEW
-- [Next Steps](#next-steps) ← NEW
-
+> **A hands-on, documented journey from Cloud Engineer to DevOps/SRE Engineer**
 ---
 
 # Goals
@@ -23,10 +15,16 @@ This repository documents my hands-on journey transitioning from a backend/cloud
 
 ---
 
-# Step 1 — Kubernetes Setup (Minikube)
-
-## Objective
-Set up a local Kubernetes cluster using Minikube.
+## Table of Contents
+- [Step 1: Kubernetes Setup (Minikube)](#step-1--kubernetes-setup-minikube)
+- [Step 2: First Deployment](#step-2-first-deployment)
+- [K8s Magic: Self-Healing & Scaling](#k8s-magic)
+- [Visualizing with Dashboard](#use-kubernetes-dashboard-to-visualise-the-cluster)
+- [Clean Up](#clean-up)
+- [Key Learnings](#key-learnings)
+- [Next Steps](#next-steps)
+- [Resources](#resources)
+  
 
 ---
 
@@ -44,7 +42,14 @@ Set up a local Kubernetes cluster using Minikube.
 
 ---
 
-## **Then start a single-node Kubernetes cluster:**
+# Step 1 — Kubernetes Setup (Minikube)
+
+## Objective
+Set up a local Kubernetes cluster using Minikube.
+
+---
+
+## **Start a single-node Kubernetes cluster:**
 ```
 minikube start
 ```
@@ -126,6 +131,23 @@ kubectl get all -n kube-system
 
 ## Objective
 Deploy something simple to understand K8s basics
+
+---
+
+### Architecture Overview
+
+**What I deployed:**
+
+```
+Internet
+    ↓
+NodePort Service (nginx-service)
+    ↓
+    Load Balancer
+    ↓         ↓
+Pod 1     Pod 2
+(nginx)   (nginx)
+```
 
 ---
 
@@ -312,7 +334,6 @@ spec:
 ```
 
 ## Then apply the service:
-
 ```
 kubectl apply -f nginx-service.yaml
 ```
@@ -475,3 +496,16 @@ minikube stop
 - CI/CD pipeline with GitHub Actions
 - Blue-green deployment strategy
 - GitOps with ArgoCD
+
+---
+
+## Resources
+
+**Guides I found helpful:**
+- [Kubernetes Official Docs](https://kubernetes.io/docs/)
+- [Minikube Documentation](https://minikube.sigs.k8s.io/docs/)
+- [roadmap.sh DevOps Projects](https://roadmap.sh/devops/projects)
+
+**Tools:**
+- [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+- [Lens Desktop](https://k8slens.dev/) - K8s IDE (alternative to dashboard)
