@@ -58,11 +58,11 @@ minikube start
 Minikube failed with:
 "This computer doesn't have VT-X/AMD-v enabled."
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/minikube%20error.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/minikube%20error.png)
 
 ### **Even though it is:**
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/BIOS.jpeg)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/BIOS.jpeg)
 
 
 ### **Caused by:**
@@ -82,11 +82,11 @@ minikube delete
 minikube start --driver=docker
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20driver.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20driver.png)
 
 ### **Ensure Docker Desktop is running:**
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/docker%20desktop.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20desktop.png)
 
 ---
 
@@ -99,7 +99,7 @@ kubectl get nodes
 
 ### **Result:**
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubernetes%20checks.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/kubernetes%20checks.png)
 
 ✅ Kubernetes cluster is running (minikube node)
 
@@ -123,7 +123,7 @@ kubectl get services --all-namespaces
 kubectl get all -n kube-system
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/exploring.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/exploring.png)
 
 ---
 
@@ -156,7 +156,7 @@ Pod 1     Pod 2
 mkdir k8s-learning
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/k8s-learning%20folder.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/k8s-learning%20folder.png)
 
 ---
 
@@ -165,7 +165,7 @@ mkdir k8s-learning
 notepad nginx-deployment.yaml
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/deployment%20file%20.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/deployment%20file%20.png)
 
 ### **Content:**
 
@@ -202,18 +202,18 @@ kubectl apply -f nginx-deployment.yaml
 
 ### **Error:**
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20deployment%20error.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/nginx%20deployment%20error.png)
 
 ### **Restart minikube:**
 ```
 minikube start --driver=docker
 ```
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/restart%20minikube.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/restart%20minikube.png)
 
 
 ### **Retry deployment:**
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/successful%20deployment.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/successful%20deployment.png)
 
 ### **Success! Now to explore...**
 
@@ -224,7 +224,7 @@ minikube start --driver=docker
 kubectl get deployments
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubectl%20get%20deployment.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/kubectl%20get%20deployment.png)
 
 ✅ READY 2/2 = 2 pods running out of 2 desired 
 
@@ -237,7 +237,7 @@ kubectl get deployments
 kubectl get pods
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubectl%20get%20pods.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/kubectl%20get%20pods.png)
 
 
 ✅ 2 pods (because replicas: 2)
@@ -254,7 +254,7 @@ kubectl get pods
 kubectl describe pod nginx-deployment-fd956d49d-7lshm
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/kubctl%20detailed%20pod%20info.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/kubctl%20detailed%20pod%20info.png)
 
 
 **Tons of info:**
@@ -271,7 +271,7 @@ kubectl describe pod nginx-deployment-fd956d49d-7lshm
 kubectl logs nginx-deployment-fd956d49d-7lshm
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/pod%20logs.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/pod%20logs.png)
 
 
 ### **Get shell access to a pod:**
@@ -285,7 +285,7 @@ kubectl exec -it nginx-deployment-fd956d49d-7lshm -- /bin/bash
 cat /etc/nginx/nginx.conf
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/pod%20shell%20access.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/pod%20shell%20access.png)
 
 
 ### **See processes:**
@@ -295,7 +295,7 @@ ps aux
 
 ### **Error:**
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/ps%20aux%20error.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/ps%20aux%20error.png)
 
 ### **Why?**
 The nginx container image is minimal — it only includes what's needed to run nginx, nothing extra. ps is not needed to run nginx, so it's not included.
@@ -305,7 +305,7 @@ The nginx container image is minimal — it only includes what's needed to run n
 cat /proc/*/cmdline
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/alt%20processes%20cmd.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/alt%20processes%20cmd.png)
 
 ---
 
@@ -344,16 +344,16 @@ kubectl apply -f nginx-service.yaml
 kubectl get services
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/create%20nginx%20service.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/create%20nginx%20service.png)
 
 ## Lastly, access nginx in the browser:
 
 ```
 minikube service nginx-service
 ```
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20browser%201.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/nginx%20browser%201.png)
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20browser%202.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/nginx%20browser%202.png)
 
 ---
 
@@ -366,7 +366,7 @@ kubectl delete pod nginx-deployment-fd956d49d-7lshm
 kubectl get pods
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/self%20healing.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/self%20healing.png)
 
 A new pod (nginx-deployment-fd956d49d-wdpgx) is automatically created to maintain `replicas: 2` in the nginx-deployment.yaml configuration file.
 
@@ -380,7 +380,7 @@ kubectl scale deployment nginx-deployment --replicas=2
 kubectl get pods
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/scale%20up%20and%20down.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/scale%20up%20and%20down.png)
 
 K8s constantly works to match actual state with the **desired state**.
 
@@ -400,7 +400,7 @@ kubectl rollout status deployment/nginx-deployment
 kubectl describe pods | findstr Image:
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/nginx%20rolling%20update.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/nginx%20rolling%20update.png)
 
 K8s:
 * Created new pods with nginx:1.26
@@ -415,7 +415,7 @@ K8s:
 minikube dashboard
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/dashboard%20cmd.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/dashboard%20cmd.png)
 
 ### Result:
 This opens a web UI showing:
@@ -426,7 +426,7 @@ This opens a web UI showing:
 * Logs
 * Etc.
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/dashboard%20view.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/dashboard%20view.png)
 
 ## One command to see everything:
 ```
@@ -439,7 +439,7 @@ kubectl get all
 * Deployments (pod managers)
 * ReplicaSets (created by Deployment, manages pod replicas)
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/get%20all%20cmd.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/get%20all%20cmd.png)
 
 ## Clean up
 
@@ -451,7 +451,7 @@ kubectl get all
 minikube stop
 ```
 
-![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/clean%20up.png)
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/clean%20up.png)
 
 ---
 
