@@ -11,6 +11,17 @@ A production-grade Wallet Service microservice with:
 - Transaction logging
 - Auto-generated API documentation
 
+---
+
+## Quick Links
+- [Architecture](#architecture)
+- [Local Testing](#step-9-test-everything-locally)
+- [Docker Build](#step-10-containerize-the-service)
+- [Troubleshooting](#error)
+- [Key Learnings](#key-learnings)
+
+---
+
 ### Architecture
 
 **Before (AWS Serverless):**
@@ -22,6 +33,20 @@ API Gateway → 5 separate Lambda functions → DynamoDB
 ```
 FastAPI app → 5 routes in single service → DynamoDB Local
 ```
+
+### Architecture Comparison
+
+| Aspect | AWS Serverless | Containerized Microservice |
+|--------|---------------|---------------------------|
+| **Deployment** | 5 separate Lambda functions | 1 unified FastAPI service |
+| **Routing** | API Gateway handles routing | FastAPI handles routing internally |
+| **Database** | AWS DynamoDB (managed) | DynamoDB Local (development) |
+| **Scaling** | AWS auto-scales per function | Kubernetes will scale pods (Week 3) |
+| **Cost** | Pay per invocation | Fixed container cost |
+| **Local Testing** | Difficult (requires SAM/LocalStack) | Easy (Docker + DynamoDB Local) |
+| **Development Speed** | Slower (deploy to test) | Faster (instant local testing) |
+
+---
 
 ## Build FastAPI Service
 
@@ -837,7 +862,7 @@ wallet-service   v1      abc123def456   2 minutes ago   180MB
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20docker%20image.png)
 
-## Stepp 11: Run the wallet service container
+## Step 11: Run the wallet service container
 
 ```
 docker run -d `
@@ -975,6 +1000,59 @@ docker rm dynamodb-local
 ### But don't delete the images!
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20clean%20up.png)
+
+## Key Learnings
+
+### Technical Skills Gained
+- **FastAPI Framework:** Built RESTful API with auto-generated docs
+- **Pydantic Validation:** Automatic request/response validation
+- **Docker Containerization:** Multi-stage builds, port mapping, networking
+- **DynamoDB Integration:** Local development with DynamoDB Local
+- **Error Handling:** HTTP status codes, logging, exception handling
+
+### Problem-Solving
+- **Port Conflicts:** Learned Docker port mapping (`-p host:container`)
+- **Container Networking:** Used `host.docker.internal` for inter-container communication
+- **Debugging:** Container logs, verifying connections, testing endpoints
+
+### Architecture Insights
+- **Lambda → FastAPI Conversion:** Unified 5 Lambda functions into single service
+- **Microservice Patterns:** Request/response models, separation of concerns
+- **Database Layer:** Abstracted DynamoDB operations for clean code
+
+### Production Patterns
+- **Health Checks:** Added `/health` endpoint for K8s probes
+- **CORS Configuration:** Enabled cross-origin requests for frontend
+- **Transaction Logging:** Financial audit trail for every operation
+- **Structured Logging:** JSON logs for better observability
+
+---
+
+## Portfolio Value
+
+**This project demonstrates:**
+
+### For Backend Engineer Roles:
+- RESTful API design
+- Database integration (DynamoDB)
+- Data validation (Pydantic)
+- Error handling and logging
+- Auto-generated API documentation
+
+### For DevOps/SRE Roles:
+- Docker containerization
+- Multi-container applications
+- Container networking
+- Infrastructure as Code (Dockerfile)
+- Local development environment setup
+
+### For Cloud Engineer Roles:
+- AWS service integration (DynamoDB)
+- Serverless to microservice migration
+- Cloud-native architecture patterns
+- Environment configuration management
+
+---
 
 ## Next Steps:
 ✅ Deploy DynamoDB Local to K8s  
