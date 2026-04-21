@@ -1,17 +1,17 @@
 # Week 2: Building Microservices
 
-## Goal
+## Objective
 Convert AWS Lambda functions from my Serverless Fintech Ecosystem into a 
 containerized FastAPI microservice.
 
-## What I Built
+### What I Built
 A production-grade Wallet Service microservice with:
 - 5 RESTful API endpoints
 - DynamoDB Local integration
 - Transaction logging
 - Auto-generated API documentation
 
-## Architecture
+### Architecture
 
 **Before (AWS Serverless):**
 ```
@@ -23,11 +23,11 @@ API Gateway → 5 separate Lambda functions → DynamoDB
 FastAPI app → 5 routes in single service → DynamoDB Local
 ```
 
-#  Build FastAPI Service
+## Build FastAPI Service
 
-## Step 1: Project Structure
+## **Step 1: Project Structure**
 
-Convert this:
+### Convert this:
 
 ```
 5 separate Lambda functions:
@@ -38,7 +38,7 @@ Convert this:
 └── get_wallet_transactions/handler.py
 ```
 
-Into this:
+### Into this:
 
 ```
 1 unified FastAPI service:
@@ -71,7 +71,7 @@ mkdir app\routers
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/create%20new%20folder.png)
 
 
-## Create the necessary project files:
+### Create the necessary project empty files:
 
 ```
 # Create __init__.py files (marks directories as Python packages)
@@ -90,20 +90,20 @@ New-Item -Path "README.md" -ItemType File
 New-Item -Path ".dockerignore" -ItemType File
 ```
 
-Not going to include a screenshot of the command line out put because it's very long.  
-Instead I'm going to verify the structure of the wallet-service folder using this command:
+**Not going to include a screenshot of the command line out put because it's very long.**  
+**Instead I'm going to verify the structure of the wallet-service folder using this command:**
 
 ```
 tree /F
 ```
 
-And the result is:
+### And the result is:
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20structure.png)
 
-Perfect!
+### Perfect!
 
-## Next, define the necessary dependencies in the requirements.txt file by adding the following to it:
+## Step 2: Define the necessary dependencies in the requirements.txt file by adding the following to it
 
 ```
 fastapi==0.115.0
@@ -113,7 +113,7 @@ pydantic==2.9.0
 python-dotenv==1.0.1
 ```
 
-## What are these things?
+### What are these things?
 * fastapi - Web framework
 * uvicorn - ASGI server (runs FastAPI)
 * boto3 - AWS SDK (for DynamoDB)
@@ -122,9 +122,7 @@ python-dotenv==1.0.1
 
 ---
 
-## Step 2: Define Models
-
-Create the Pydantic Models by adding this to the `app/models.py`:
+## Step 3: Define the Data Models with Pydantic Models by adding this to the `app/models.py`
 
 ```
 from pydantic import BaseModel, Field
@@ -177,9 +175,7 @@ class SuccessResponse(BaseModel):
     balance: Decimal
 ```
 
-## Step 3: Create Database Layer
-
-### Next create DynamoDB helper functions. Add the following to the `app/db.py` file:
+## Step 4: Create Database Layer with DynamoDB helper functions. Add the following to the `app/db.py` file
 
 ```
 import boto3
@@ -332,19 +328,472 @@ def get_wallet_transactions(wallet_id: str, limit: int = 50):
         raise
 ```
 
-This code creates the connection to the DynamoDB table (in the case of this project, that'll be local but it can also connect to AWS).  
-It creates functions to handle CRUD operations on the `wallets_table` and creates transaction records in the `transaction_logs` table.
+**This code creates the connection to the DynamoDB table (in the case of this project, that'll be local but it can also connect to AWS).**  
+**It creates functions to handle CRUD operations on the `wallets_table` with balance update validation and it creates transaction records in the `transaction_logs` table.**
 
+---
+
+## Step 5: Create the wallet API routes by adding this to the `app/routers/wallets.py` file
+
+```
+from fastapi import APIRouter, HTTPException, status
+from app.models import (
+    WalletCreate,
+    WalletResponse,
+    CreditRequest,
+    DebitRequest,
+    TransactionResponse,
+    SuccessResponse
+)
+from app.db import (
+    get_wallet,
+    create_wallet as create_wallet_db,
+    update_wallet_balance,
+    create_transaction,
+    get_wallet_transactions as get_transactions_db
+)
+from decimal import Decimal
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+@router.post("/", response_model=WalletResponse, status_code=status.HTTP_201_CREATED)
+async def create_wallet(wallet_data: WalletCreate):
+    """Create a new wallet"""
+    try:
+        wallet = create_wallet_db(
+            user_id=wallet_data.user_id,
+            currency=wallet_data.currency,
+            initial_balance=wallet_data.initial_balance
+        )
+        
+        # Convert Decimal to float for response (Pydantic handles this)
+        return WalletResponse(**wallet)
+    except Exception as e:
+        logger.error(f"Error creating wallet: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create wallet"
+        )
+
+@router.get("/{wallet_id}", response_model=WalletResponse)
+async def get_wallet_by_id(wallet_id: str):
+    """Get wallet by ID"""
+    wallet = get_wallet(wallet_id)
+    
+    if not wallet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Wallet {wallet_id} not found"
+        )
+    
+    return WalletResponse(**wallet)
+
+@router.post("/{wallet_id}/credit", response_model=SuccessResponse)
+async def credit_wallet(wallet_id: str, credit_data: CreditRequest):
+    """Add funds to wallet"""
+    # Check wallet exists
+    wallet = get_wallet(wallet_id)
+    if not wallet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Wallet {wallet_id} not found"
+        )
+    
+    try:
+        # Update balance
+        updated_wallet = update_wallet_balance(
+            wallet_id=wallet_id,
+            amount=credit_data.amount,
+            operation='add'
+        )
+        
+        # Create transaction record
+        create_transaction(
+            wallet_id=wallet_id,
+            transaction_type='CREDIT',
+            amount=credit_data.amount,
+            balance_after=updated_wallet['balance'],
+            description=credit_data.description,
+            reference_id=credit_data.reference_id
+        )
+        
+        return SuccessResponse(
+            message="Wallet credited successfully",
+            wallet_id=wallet_id,
+            balance=updated_wallet['balance']
+        )
+    except Exception as e:
+        logger.error(f"Error crediting wallet: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to credit wallet"
+        )
+
+@router.post("/{wallet_id}/debit", response_model=SuccessResponse)
+async def debit_wallet(wallet_id: str, debit_data: DebitRequest):
+    """Remove funds from wallet"""
+    # Check wallet exists
+    wallet = get_wallet(wallet_id)
+    if not wallet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Wallet {wallet_id} not found"
+        )
+    
+    try:
+        # Update balance
+        updated_wallet = update_wallet_balance(
+            wallet_id=wallet_id,
+            amount=debit_data.amount,
+            operation='subtract'
+        )
+        
+        # Create transaction record
+        create_transaction(
+            wallet_id=wallet_id,
+            transaction_type='DEBIT',
+            amount=debit_data.amount,
+            balance_after=updated_wallet['balance'],
+            description=debit_data.description,
+            reference_id=debit_data.reference_id
+        )
+        
+        return SuccessResponse(
+            message="Wallet debited successfully",
+            wallet_id=wallet_id,
+            balance=updated_wallet['balance']
+        )
+    except ValueError as e:
+        # Insufficient funds
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error debiting wallet: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to debit wallet"
+        )
+
+@router.get("/{wallet_id}/transactions", response_model=list[TransactionResponse])
+async def get_wallet_transactions(wallet_id: str, limit: int = 50):
+    """Get transaction history for wallet"""
+    # Check wallet exists
+    wallet = get_wallet(wallet_id)
+    if not wallet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Wallet {wallet_id} not found"
+        )
+    
+    try:
+        transactions = get_transactions_db(wallet_id, limit)
+        return [TransactionResponse(**tx) for tx in transactions]
+    except Exception as e:
+        logger.error(f"Error getting transactions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve transactions"
+        )
+```
+
+**This defines all 5 endpoints and requests validation from Pydantic.**
+
+## Step 6: Create the main app with the following code in the `app/main.py` file
+
+```
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.routers import wallets
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+logger = logging.getLogger(__name__)
+
+# Create FastAPI app
+app = FastAPI(
+    title="Wallet Service",
+    description="Microservice for managing digital wallets",
+    version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify exact origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(wallets.router, prefix="/wallets", tags=["wallets"])
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for K8s liveness/readiness probes"""
+    return {
+        "status": "healthy",
+        "service": "wallet-service"
+    }
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {
+        "message": "Wallet Service API",
+        "version": "1.0.0",
+        "docs": "/docs"
+    }
+```
+
+**This code creates FastAPI application, adds Cross-Origin Resource Sharing (CORS) for frontend access, includes the wallet routes, a health check endpoint (for K8s probes) at `/health`, and creates auto-generated docs at a `/docs` endpoint.**
+
+## Step 7: Create the Dockerfile
+
+### Add this to the `Dockerfile `:
+
+```
+# Use official Python image
+FROM python:3.12-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first (for Docker layer caching)
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app/ ./app/
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Create the `.dockerignore` file with this:
+
+```
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+*.log
+.git
+.gitignore
+README.md
+.DS_Store
+```
+
+## Step 8: Create the database setup script by adding this to the `setup_db.py` file
+
+```
+import boto3
+import time
+import os
+
+DYNAMODB_ENDPOINT = os.environ.get('DYNAMODB_ENDPOINT', 'http://localhost:8000')
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+
+dynamodb = boto3.resource(
+    'dynamodb',
+    endpoint_url=DYNAMODB_ENDPOINT,
+    region_name=AWS_REGION,
+    aws_access_key_id='dummy',
+    aws_secret_access_key='dummy'
+)
+
+def create_wallets_table():
+    """Create wallets table"""
+    try:
+        table = dynamodb.create_table(
+            TableName='wallets',
+            KeySchema=[
+                {'AttributeName': 'wallet_id', 'KeyType': 'HASH'}
+            ],
+            AttributeDefinitions=[
+                {'AttributeName': 'wallet_id', 'AttributeType': 'S'}
+            ],
+            BillingMode='PAY_PER_REQUEST'
+        )
+        print("✅ Created 'wallets' table")
+        return table
+    except dynamodb.meta.client.exceptions.ResourceInUseException:
+        print("ℹ️  'wallets' table already exists")
+        return dynamodb.Table('wallets')
+
+def create_transactions_table():
+    """Create transactions table"""
+    try:
+        table = dynamodb.create_table(
+            TableName='transactions',
+            KeySchema=[
+                {'AttributeName': 'transaction_id', 'KeyType': 'HASH'}
+            ],
+            AttributeDefinitions=[
+                {'AttributeName': 'transaction_id', 'AttributeType': 'S'}
+            ],
+            BillingMode='PAY_PER_REQUEST'
+        )
+        print("✅ Created 'transactions' table")
+        return table
+    except dynamodb.meta.client.exceptions.ResourceInUseException:
+        print("ℹ️  'transactions' table already exists")
+        return dynamodb.Table('transactions')
+
+if __name__ == "__main__":
+    print("🗄️  Setting up DynamoDB tables...")
+    print(f"📍 Endpoint: {DYNAMODB_ENDPOINT}")
+    
+    create_wallets_table()
+    create_transactions_table()
+    
+    print("\n✅ Database setup complete!")
+    print("\nTables created:")
+    print("  - wallets")
+    print("  - transactions")
+```
+
+## Step 9: Test everything locally
+
+### First start DynamoDB Local:
+
+*Note: Remember to restart minikube!*
+
+```
+# Run DynamoDB Local in Docker
+docker run -d -p 8000:8000 --name dynamodb-local amazon/dynamodb-local
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/remember%20to%20restart%20minikube.png)
+
+### Verify that Docker is running - should see dynamodb-local running
+
+```
+docker ps
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20dynamodb-local.png)
+
+### Install Python dependencies locally
+
+```
+# In wallet-service directory
+pip install -r requirements.txt
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/install%20requirements.png)
+
+
+###  Create the database tables
+
+```
+# Set environment variable
+$env:DYNAMODB_ENDPOINT="http://localhost:8000"
+
+# Run setup script
+python setup_db.py
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/db%20setup.png)
+
+### Run the FastAPI app
+
+```
+# Run app
+uvicorn app.main:app --reload
+```
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/main%20app.png)
+
+### Open browser to: http://127.0.0.1:8000/docs to see the auto-generated documentation (this is Swagger UI from FastAPI) 
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/swagger%20UI.png)
+
+--- 
 
 ## Testing
 
-### Create Wallet
+### Test 1: Create a wallet
+* Click on POST /wallets/
+* Click "Try it out"
+* Enter request body:
+```
+json{
+  "user_id": "user123",
+  "currency": "USD",
+  "initial_balance": 100.00
+}
+```
+* Click "Execute"
 
-![alt text]()
+Expected response: 201 Created with wallet_id
 
-### Get Transactions
+### Response:
 
-![alt text]()
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/create-wallet.png)
+
+### Test 2: Get wallet
+* Copy the wallet_id from response
+* Click on GET /wallets/{wallet_id}
+* Click "Try it out"
+* Paste wallet_id
+* Click "Execute"
+
+Expected response: 200 OK with wallet details
+
+### Response:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/get%20wallet.png)
+
+### Test 3: Credit wallet
+* Click on POST /wallets/{wallet_id}/credit
+* Click "Try it out"
+* Enter wallet_id and:
+```
+json{
+  "amount": 50.00,
+  "description": "Test credit"
+}
+```
+* Click "Execute"
+
+Expected response: 200 OK, balance should be 150.00
+
+### Response:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/credit.png)
+
+### Test 4: Get transactions
+* Click on GET /wallets/{wallet_id}/transactions
+* Click "Try it out"
+* Enter wallet_id
+* Click "Execute"
+
+Expected response: 200 OK with list of transactions
+
+### Response:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/get%20transactions.png)
 
 ## Key Learnings
 - Lambda handlers vs web framework routes
