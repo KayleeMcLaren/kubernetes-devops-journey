@@ -729,9 +729,6 @@ uvicorn app.main:app --reload
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/swagger%20UI.png)
 
---- 
-
-## Testing
 
 ### Test 1: Create a wallet
 * Click on POST /wallets/
@@ -746,7 +743,7 @@ json{
 ```
 * Click "Execute"
 
-Expected response: 201 Created with wallet_id
+### Expected response: 201 Created with wallet_id
 
 ### Response:
 
@@ -759,7 +756,7 @@ Expected response: 201 Created with wallet_id
 * Paste wallet_id
 * Click "Execute"
 
-Expected response: 200 OK with wallet details
+### Expected response: 200 OK with wallet details
 
 ### Response:
 
@@ -777,7 +774,7 @@ json{
 ```
 * Click "Execute"
 
-Expected response: 200 OK, balance should be 150.00
+### Expected response: 200 OK, balance should be 150.00
 
 ### Response:
 
@@ -789,19 +786,199 @@ Expected response: 200 OK, balance should be 150.00
 * Enter wallet_id
 * Click "Execute"
 
-Expected response: 200 OK with list of transactions
+### Expected response: 200 OK with list of transactions
 
 ### Response:
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/get%20transactions.png)
 
-## Key Learnings
-- Lambda handlers vs web framework routes
-- Pydantic for data validation
-- FastAPI auto-generates API docs
-- DynamoDB Local for development
+## Step 10: Containerize the service
 
-## Next Steps
-- Containerize with Docker
-- Deploy to Kubernetes
-- Add service-to-service communication
+### Stop the local uvicorn server
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/shut%20down.png)
+
+### Build the Docker image
+
+```
+# In wallet-service directory
+docker build -t wallet-service:v1 .
+```
+### Expected Output:
+```
+[+] Building 25.3s (10/10) FINISHED
+ => [internal] load build definition from Dockerfile
+ => [internal] load .dockerignore
+ => [1/5] FROM docker.io/library/python:3.12-slim
+ => [2/5] WORKDIR /app
+ => [3/5] COPY requirements.txt .
+ => [4/5] RUN pip install --no-cache-dir -r requirements.txt
+ => [5/5] COPY app/ ./app/
+ => exporting to image
+ => => naming to docker.io/library/wallet-service:v1
+```
+
+### Output:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20build.png)
+
+## Verify that the image was created
+
+```
+docker images | Select-String wallet-service
+```
+
+### Expected output:
+```
+wallet-service   v1      abc123def456   2 minutes ago   180MB
+```
+
+### Output:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20docker%20image.png)
+
+## Stepp 11: Run the wallet service container
+
+```
+docker run -d `
+  --name wallet-service `
+  -p 8000:8000 `
+  -e DYNAMODB_ENDPOINT=http://host.docker.internal:8000 `
+  wallet-service:v1
+```
+
+### What this does:
+
+* -d = run in background (detached)
+* --name wallet-service = give it a name
+* -p 8000:8000 = map port 8000 (container) to 8000 (host)
+* -e DYNAMODB_ENDPOINT=... = set environment variable  
+    * host.docker.internal = Docker's way to access host machine
+* wallet-service:v1 = the image to run
+
+### Error:
+
+**Port 8000 is already being used by the  DynamoDB Local container**
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20run%20error.png)
+
+### Solution:
+
+### Stop and remove the failed container first
+
+```
+docker rm wallet-service
+```
+
+### Run wallet-service on port 8001
+
+```
+docker run -d `
+  --name wallet-service `
+  -p 8001:8000 `
+  -e DYNAMODB_ENDPOINT=http://host.docker.internal:8000 `
+  wallet-service:v1
+```
+
+###  Check both containers are running
+
+```
+docker ps
+```
+
+### Result:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20solution.png)
+
+### What changed?
+* -p 8001:8000 instead of -p 8000:8000
+    * 8001 = port on the host machine (Windows)
+    * 8000 = port inside the container (FastAPI still runs on 8000)
+
+Now access your service at: http://127.0.0.1:8001/docs
+
+### Port Mapping
+Docker port mapping syntax: `-p HOST_PORT:CONTAINER_PORT`
+
+```
+-p 8001:8000
+   ↑     ↑
+   |     └─ Port 8000 inside container (FastAPI listening)
+   └─ Port 8001 on your Windows machine (what you access in browser)
+```
+
+My setup:
+```
+Your Browser (Windows)
+    ↓
+localhost:8001  ← Access wallet service here
+    ↓
+Docker Host
+    ↓
+wallet-service container (port 8000 internally)
+```
+
+And:
+
+```
+Wallet Service Container
+    ↓
+host.docker.internal:8000  ← DynamoDB Local
+    ↓
+Docker Host
+    ↓
+dynamodb-local container (port 8000 internally)
+```
+
+### Test the wallet service
+Open browser: http://127.0.0.1:8001/docs to see the Swagger UI
+
+### Create a wallet to verify database connection
+* POST /wallets/
+* Request body:
+```
+json{
+  "user_id": "docker-test",
+  "currency": "USD",
+  "initial_balance": 200.00
+}
+```
+
+### Expect to get 201 Created response
+
+### Response:
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20test%20wallet.png)
+
+### Success!
+
+## Step 12: Clean Up
+
+### Check container logs
+
+```
+docker logs wallet-service
+```
+
+### Stop containers
+```
+docker stop wallet-service
+docker stop dynamodb-local
+```
+
+### Remove containers
+```
+docker rm wallet-service
+docker rm dynamodb-local
+```
+
+### But don't delete the images!
+
+![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20clean%20up.png)
+
+## Next Steps:
+✅ Deploy DynamoDB Local to K8s  
+✅ Deploy wallet-service to K8s  
+✅ Create K8s manifests (Deployments, Services, ConfigMaps)  
+✅ Test everything works in K8s  
+✅ Add Ingress for external access
