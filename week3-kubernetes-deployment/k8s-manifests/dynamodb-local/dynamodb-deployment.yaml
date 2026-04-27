@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamodb-local
+  labels:
+    app: dynamodb-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamodb-local
+  template:
+    metadata:
+      labels:
+        app: dynamodb-local
+    spec:
+      containers:
+      - name: dynamodb-local
+        image: amazon/dynamodb-local:latest
+        ports:
+        - containerPort: 8000
+          name: dynamodb
+        command:
+          - "java"
+          - "-jar"
+          - "DynamoDBLocal.jar"
+          - "-sharedDb"
+          - "-inMemory"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
