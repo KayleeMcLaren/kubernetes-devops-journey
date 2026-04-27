@@ -50,7 +50,7 @@ FastAPI app → 5 routes in single service → DynamoDB Local
 
 ## Build FastAPI Service
 
-## **Step 1: Project Structure**
+## Step 1: Project Structure
 
 ### Convert this:
 
@@ -81,7 +81,7 @@ wallet-service/
 └── README.md
 ```
 
-### First Create the directory structure
+**1.1 First create the directory structure:**
 ```
 # Navigate to where you want to create this
 cd C:\Users\YourUsername\
@@ -96,7 +96,7 @@ mkdir app\routers
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/create%20new%20folder.png)
 
 
-### Create the necessary project empty files:
+**1.2 Create the necessary project empty files:**
 
 ```
 # Create __init__.py files (marks directories as Python packages)
@@ -122,13 +122,17 @@ New-Item -Path ".dockerignore" -ItemType File
 tree /F
 ```
 
-### And the result is:
+**And the result is:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20structure.png)
 
-### Perfect!
+**Perfect!**
 
-## Step 2: Define the necessary dependencies in the requirements.txt file by adding the following to it
+---
+
+## Step 2: Define the necessary dependencies
+
+**2.1 Create the requirements.txt file by adding the following to it:**
 
 ```
 fastapi==0.115.0
@@ -138,7 +142,7 @@ pydantic==2.9.0
 python-dotenv==1.0.1
 ```
 
-### What are these things?
+**What are these?**
 * fastapi - Web framework
 * uvicorn - ASGI server (runs FastAPI)
 * boto3 - AWS SDK (for DynamoDB)
@@ -147,7 +151,8 @@ python-dotenv==1.0.1
 
 ---
 
-## Step 3: Define the Data Models with Pydantic Models by adding this to the `app/models.py`
+## Step 3: Define the Data Models 
+**3.1 Create the Pydantic Models by adding this to the `app/models.py`:**
 
 ```
 from pydantic import BaseModel, Field
@@ -200,7 +205,10 @@ class SuccessResponse(BaseModel):
     balance: Decimal
 ```
 
-## Step 4: Create Database Layer with DynamoDB helper functions. Add the following to the `app/db.py` file
+---
+
+## Step 4: Create Database Layer
+**4.1 Create the DynamoDB helper functions by adding the following to the `app/db.py` file:**
 
 ```
 import boto3
@@ -358,7 +366,8 @@ def get_wallet_transactions(wallet_id: str, limit: int = 50):
 
 ---
 
-## Step 5: Create the wallet API routes by adding this to the `app/routers/wallets.py` file
+## Step 5: Create the wallet API routes
+**5.1 Add this to the `app/routers/wallets.py` file:**
 
 ```
 from fastapi import APIRouter, HTTPException, status
@@ -528,7 +537,10 @@ async def get_wallet_transactions(wallet_id: str, limit: int = 50):
 
 **This defines all 5 endpoints and requests validation from Pydantic.**
 
-## Step 6: Create the main app with the following code in the `app/main.py` file
+---
+
+## Step 6: Create the main app 
+**6.1 Add the following code to the `app/main.py` file:**
 
 ```
 from fastapi import FastAPI
@@ -584,9 +596,11 @@ async def root():
 
 **This code creates FastAPI application, adds Cross-Origin Resource Sharing (CORS) for frontend access, includes the wallet routes, a health check endpoint (for K8s probes) at `/health`, and creates auto-generated docs at a `/docs` endpoint.**
 
+---
+
 ## Step 7: Create the Dockerfile
 
-### Add this to the `Dockerfile `:
+**7.1 Add this to the `Dockerfile `:**
 
 ```
 # Use official Python image
@@ -611,7 +625,7 @@ EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-### Create the `.dockerignore` file with this:
+**7.2 Create the `.dockerignore` file with this:**
 
 ```
 __pycache__
@@ -629,7 +643,10 @@ README.md
 .DS_Store
 ```
 
-## Step 8: Create the database setup script by adding this to the `setup_db.py` file
+---
+
+## Step 8: Create the database setup script 
+**8.1 Add this to the `setup_db.py` file:**
 
 ```
 import boto3
@@ -698,9 +715,11 @@ if __name__ == "__main__":
     print("  - transactions")
 ```
 
+---
+
 ## Step 9: Test everything locally
 
-### First start DynamoDB Local:
+**9.1 First start DynamoDB Local:**
 
 *Note: Remember to restart minikube!*
 
@@ -719,7 +738,7 @@ docker ps
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20dynamodb-local.png)
 
-### Install Python dependencies locally
+**9.2 Install Python dependencies locally:**
 
 ```
 # In wallet-service directory
@@ -729,7 +748,7 @@ pip install -r requirements.txt
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/install%20requirements.png)
 
 
-###  Create the database tables
+**9.3 Create the database tables:**
 
 ```
 # Set environment variable
@@ -741,7 +760,7 @@ python setup_db.py
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/db%20setup.png)
 
-### Run the FastAPI app
+**9.4 Run the FastAPI app:**
 
 ```
 # Run app
@@ -750,12 +769,13 @@ uvicorn app.main:app --reload
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/main%20app.png)
 
-### Open browser to: http://127.0.0.1:8000/docs to see the auto-generated documentation (this is Swagger UI from FastAPI) 
+**9.5 Test the API:**  
+Open browser to: http://127.0.0.1:8000/docs to see the auto-generated documentation (this is Swagger UI from FastAPI) 
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/swagger%20UI.png)
 
 
-### Test 1: Create a wallet
+**Test 1: Create a wallet**
 * Click on POST /wallets/
 * Click "Try it out"
 * Enter request body:
@@ -768,26 +788,26 @@ json{
 ```
 * Click "Execute"
 
-### Expected response: 201 Created with wallet_id
+**Expected response: 201 Created with wallet_id**
 
-### Response:
+**Response:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/create-wallet.png)
 
-### Test 2: Get wallet
+**Test 2: Get wallet**
 * Copy the wallet_id from response
 * Click on GET /wallets/{wallet_id}
 * Click "Try it out"
 * Paste wallet_id
 * Click "Execute"
 
-### Expected response: 200 OK with wallet details
+**Expected response: 200 OK with wallet details**
 
-### Response:
+**Response:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/get%20wallet.png)
 
-### Test 3: Credit wallet
+**Test 3: Credit wallet**
 * Click on POST /wallets/{wallet_id}/credit
 * Click "Try it out"
 * Enter wallet_id and:
@@ -799,37 +819,39 @@ json{
 ```
 * Click "Execute"
 
-### Expected response: 200 OK, balance should be 150.00
+**Expected response: 200 OK, balance should be 150.00**
 
-### Response:
+**Response:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/credit.png)
 
-### Test 4: Get transactions
+**Test 4: Get transactions**
 * Click on GET /wallets/{wallet_id}/transactions
 * Click "Try it out"
 * Enter wallet_id
 * Click "Execute"
 
-### Expected response: 200 OK with list of transactions
+**Expected response: 200 OK with list of transactions**
 
-### Response:
+**Response:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/get%20transactions.png)
 
+---
+
 ## Step 10: Containerize the service
 
-### Stop the local uvicorn server
+**10.1 Stop the local uvicorn server**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/shut%20down.png)
 
-### Build the Docker image
+**10.2 Build the Docker image:**
 
 ```
 # In wallet-service directory
 docker build -t wallet-service:v1 .
 ```
-### Expected Output:
+**Expected Output:**
 ```
 [+] Building 25.3s (10/10) FINISHED
  => [internal] load build definition from Dockerfile
@@ -843,17 +865,17 @@ docker build -t wallet-service:v1 .
  => => naming to docker.io/library/wallet-service:v1
 ```
 
-### Output:
+**Output:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20build.png)
 
-## Verify that the image was created
+**10.3 Verify that the image was created:**
 
 ```
 docker images | Select-String wallet-service
 ```
 
-### Expected output:
+**Expected output:**
 ```
 wallet-service   v1      abc123def456   2 minutes ago   180MB
 ```
@@ -862,8 +884,9 @@ wallet-service   v1      abc123def456   2 minutes ago   180MB
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/verify%20docker%20image.png)
 
-## Step 11: Run the wallet service container
+## Step 11: Run the containerized service
 
+**11.1 Run wallet service container:**
 ```
 docker run -d `
   --name wallet-service `
@@ -872,8 +895,7 @@ docker run -d `
   wallet-service:v1
 ```
 
-### What this does:
-
+**What this does:**
 * -d = run in background (detached)
 * --name wallet-service = give it a name
 * -p 8000:8000 = map port 8000 (container) to 8000 (host)
@@ -920,7 +942,7 @@ docker ps
     * 8001 = port on the host machine (Windows)
     * 8000 = port inside the container (FastAPI still runs on 8000)
 
-Now access your service at: http://127.0.0.1:8001/docs
+Now access the service at: http://127.0.0.1:8001/docs
 
 ### Port Mapping
 Docker port mapping syntax: `-p HOST_PORT:CONTAINER_PORT`
@@ -934,7 +956,7 @@ Docker port mapping syntax: `-p HOST_PORT:CONTAINER_PORT`
 
 My setup:
 ```
-Your Browser (Windows)
+My Browser (Windows)
     ↓
 localhost:8001  ← Access wallet service here
     ↓
@@ -955,10 +977,22 @@ Docker Host
 dynamodb-local container (port 8000 internally)
 ```
 
-### Test the wallet service
+**11.2: Check it's running:**
+```
+docker ps
+```
+
+**Expected output:**
+```
+CONTAINER ID   IMAGE                 PORTS                    NAMES
+abc123         wallet-service:v1     0.0.0.0:8000->8000/tcp   wallet-service
+def456         amazon/dynamodb-local 0.0.0.0:8000->8000/tcp   dynamodb-local
+```
+
+**11.3 Test the wallet service:**
 Open browser: http://127.0.0.1:8001/docs to see the Swagger UI
 
-### Create a wallet to verify database connection
+**Create a wallet to verify database connection:**
 * POST /wallets/
 * Request body:
 ```
@@ -969,29 +1003,31 @@ json{
 }
 ```
 
-### Expect to get 201 Created response
+**Expect to get 201 Created response**
 
-### Response:
+**Response:**
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20test%20wallet.png)
 
-### Success!
+**Success!**
+
+---
 
 ## Step 12: Clean Up
 
-### Check container logs
+**12.1 Check container logs:**
 
 ```
 docker logs wallet-service
 ```
 
-### Stop containers
+**12.2 Stop containers:**
 ```
 docker stop wallet-service
 docker stop dynamodb-local
 ```
 
-### Remove containers
+**12.3 Remove containers:**
 ```
 docker rm wallet-service
 docker rm dynamodb-local
@@ -1000,6 +1036,8 @@ docker rm dynamodb-local
 ### But don't delete the images!
 
 ![alt text](https://github.com/KayleeMcLaren/kubernetes-devops-journey/blob/main/images/docker%20clean%20up.png)
+
+---
 
 ## Key Learnings
 
