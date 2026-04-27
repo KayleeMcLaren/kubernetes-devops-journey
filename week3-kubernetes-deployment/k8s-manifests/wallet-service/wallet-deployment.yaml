@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallet-service
+  labels:
+    app: wallet-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wallet-service
+  template:
+    metadata:
+      labels:
+        app: wallet-service
+    spec:
+      containers:
+      - name: wallet-service
+        image: wallet-service:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DYNAMODB_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: wallet-config
+              key: DYNAMODB_ENDPOINT
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: wallet-config
+              key: AWS_REGION
+        - name: WALLETS_TABLE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: wallet-config
+              key: WALLETS_TABLE_NAME
+        - name: TRANSACTIONS_TABLE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: wallet-config
+              key: TRANSACTIONS_TABLE_NAME
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
