@@ -16,40 +16,169 @@
 - Explored self-healing, scaling, and rolling updates
 - **[Detailed documentation →](week1-kubernetes-basics/README.md)**
 
+### Key Learnings:
+- Kubernetes architecture (pods, nodes, control plane)
+- YAML manifest structure
+- kubectl commands and cluster management
+- Container orchestration fundamentals
+- Self-healing and declarative configuration
+
 **Skills Gained:** kubectl, YAML manifests, container orchestration basics
 
 ### Week 2: Building Microservices ✅ COMPLETE
-- Converted 5 AWS Lambda functions to unified FastAPI service
+- Converted 5 AWS Lambda functions to unified FastAPI microservice
 - Integrated with DynamoDB Local for development
 - Built production-grade wallet service with transaction logging
-- Containerized with Docker
+- Containerized application with Docker
 - Debugged port conflicts and container networking
 - **[Detailed documentation →](week2-microservices/README.md)**
+
+### Key Learnings:
+- FastAPI framework and RESTful API design
+- Pydantic data validation
+- Docker containerization and multi-container apps
+- Port mapping and container networking
+- DynamoDB integration
+- Troubleshooting and debugging
 
 **Skills Gained:** FastAPI, Pydantic, Docker, containerization, microservice architecture
 
 ---
 
-### Week 3: Kubernetes Deployment 🚧 IN PROGRESS
-- Deploy DynamoDB Local to K8s cluster
-- Deploy wallet service with high availability (2 replicas)
-- Configure service discovery and networking
-- Add Ingress for external access
-- Implement health checks and resource limits
+### Week 3: Kubernetes Deployment ✅ COMPLETE
+- Deployed DynamoDB Local to K8s cluster
+- Deployed wallet service with high availability (2 replicas)
+- Configured service discovery and networking
+- Set up load balancing with Kubernetes Service
+- Added ConfigMaps for 12-factor app configuration
+- Configured Ingress controller for external routing
+- Implemented health checks (liveness/readiness probes) and resource limits
+- Created database tables via Kubernetes Job
 - **[Detailed documentation →](week3-kubernetes-deployment/README.md)**
 
+### Key Learnings:
+
+- Kubernetes Deployments and replica management
+- Service discovery via Kubernetes DNS
+- Load balancing across multiple pods
+- ConfigMaps for configuration management
+- Health checks for self-healing
+- Resource limits (CPU/memory)
+- Ingress controllers for external access
+- Jobs for initialization tasks
+
+**Skills Gained:** Kubernetes deployments, services, ConfigMaps, Ingress, health checks, resource management, high availability patterns
+
 ---
 
-### Week 4: Observability (Coming Soon)
+### Week 4: Observability (🚧 In progress)
+**Planned:** Prometheus + Grafana
+
+### What I'll Build:
 - Deploy Prometheus for metrics collection
-- Set up Grafana dashboards
+- Set up Grafana for dashboards and visualization
+- Create custom metrics for wallet service
 - Implement alerting rules
-- Monitor application and infrastructure metrics
+- Monitor cluster and application health
+
+**Skills to Gain:** Prometheus, Grafana, metrics collection, dashboards, alerting
 
 ---
 
-### Week 5: CI/CD & Advanced Patterns (Coming Soon)
-- GitHub Actions pipeline
-- Blue-green deployments
-- GitOps with ArgoCD
+## Project Architecture
+
+### Current State (Week 3):
+
+```
+┌─────────────────────────────────────────────┐
+│      Kubernetes Cluster (Minikube)          │
+│                                             │
+│  Ingress (nginx)                            │
+│      ↓                                      │
+│  Service: wallet-service                    │
+│      ↓           ↓                          │
+│   Pod 1       Pod 2    (2 replicas)         │
+│      ↓           ↓                          │
+│  Service: dynamodb-local                    │
+│      ↓                                      │
+│   Pod: dynamodb                             │
+└─────────────────────────────────────────────┘
+```
+
+### Components:
+
+- **Ingress:** External access and routing
+- **Services:** Load balancing and service discovery
+- **Pods:** Application containers
+- **ConfigMaps:** Configuration management
+- **Jobs:** Initialization tasks
+
+---
+
+## Skills Demonstrated
+**DevOps**
+
+- ✅ Container orchestration (Kubernetes)
+- ✅ Infrastructure as Code (YAML manifests)
+- ✅ CI/CD concepts (learning GitHub Actions)
+- ✅ Configuration management (ConfigMaps)
+- ✅ High availability patterns 
+- ✅ Service discovery 
+- ✅ Load balancing
+
+**Cloud Engineering**
+
+- ✅ AWS services (Lambda, DynamoDB, S3, etc.)
+- ✅ Terraform (2 years production experience)
+- ✅ Serverless architectures
+- ✅ Cloud-native application design 
+- ✅ Microservice patterns
+
+**Software Development**
+
+- ✅ Python (backend services, automation)
+- ✅ FastAPI (RESTful APIs)
+- ✅ React (dashboards)
+- ✅ Git workflows
+- ✅ Testing and debugging
+
+**System Administration**
+
+- ✅ Linux command line
+- ✅ Container networking
+- ✅ Resource management
+- ✅ Troubleshooting
+- ✅ Log analysis
+
+---
+
+## Repository Structure
+
+```
+kubernetes-devops-journey/
+│
+├── README.md                           # This file
+├── images/                             # All screenshots (50+)
+│
+├── week1-kubernetes-basics/
+│   ├── README.md                       # Detailed K8s setup documentation
+│   └── k8s-manifests/                  # nginx deployment files
+│
+├── week2-microservices/
+│   ├── README.md                       # FastAPI build documentation
+│   └── wallet-service/                 # Complete microservice code
+│       ├── app/                        # FastAPI application
+│       ├── Dockerfile                  # Container definition
+│       └── requirements.txt            # Python dependencies
+│
+├── week3-kubernetes-deployment/
+│   ├── README.md                       # K8s deployment documentation
+│   └── k8s-manifests/                  # All Kubernetes YAML files
+│       ├── dynamodb-local/             # DynamoDB deployment
+│       └── wallet-service/             # Wallet service deployment
+│
+└── week4-observability/
+    └── README.md                       # Coming soon
+```
+
   
